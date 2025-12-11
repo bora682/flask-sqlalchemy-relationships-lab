@@ -50,17 +50,54 @@ def get_event_sessions(id):
 
 @app.route('/speakers')
 def get_speakers():
-    pass
+    speakers = Speaker.query.all()
+    response = [
+        {
+            "id": speaker.id,
+            "name": speaker.name
+        }
+        for speaker in speakers
+    ]
+    return jsonify(response), 200
+    
 
 
 @app.route('/speakers/<int:id>')
 def get_speaker(id):
-    pass
+    speaker = Speaker.query.get(id)
+    if not speaker:
+        return jsonify({"error": "Speaker not found"}), 404
+    
+    bio_text = speaker.bio.bio_text if speaker.bio else "No bio available"
+
+    response = {
+        "id": speaker.id,
+        "name": speaker.name,
+        "bio_text": bio_text,
+    }
+
+    return jsonify(response), 200
+    
 
 
 @app.route('/sessions/<int:id>/speakers')
 def get_session_speakers(id):
-    pass
+    session = Session.query.get(id)
+    if not session:
+        return jsonify({"error": "Session not found"}), 404
+    
+    speakers_data = []
+    for speaker in session.speakers:
+        bio_text = speaker.bio.bio_text if speaker.bio else "No bio available"
+        speakers_data.append(
+            {
+                "id": speaker.id,
+                "name": speaker.name,
+                "bio_text": bio_text,
+            }
+        )
+
+    return jsonify(speakers_data), 200
 
 
 if __name__ == '__main__':
